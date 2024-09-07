@@ -1,6 +1,5 @@
-package com.keumbang.api.auth_server.global.exception;
+package com.keumbang.api.auth_server.common.exception;
 
-import com.keumbang.api.auth_server.global.error.ErrorCode;
 import lombok.Getter;
 
 @Getter
