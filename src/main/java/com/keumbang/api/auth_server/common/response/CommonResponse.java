@@ -19,6 +19,10 @@ public class CommonResponse<T> {
         return ok(null, data);
     }
 
+    public static <T> CommonResponse<T> ok(String message) {
+        return ok(message, null);
+    }
+
     public static <T> CommonResponse<T> ok(String message, T data) {
         return new CommonResponse<>(HttpStatus.OK, message, data);
     }
