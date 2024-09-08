@@ -33,6 +33,10 @@ spring:
     restart:
       enabled: true
 
+# JWT 설정
+jwt:
+  secret: ${JWT_SECRET}
+
 logging:
   config: classpath:logback-${spring.profiles.active}.xml
 
