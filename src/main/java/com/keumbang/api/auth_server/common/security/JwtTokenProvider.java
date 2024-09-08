@@ -1,7 +1,13 @@
 package com.keumbang.api.auth_server.common.security;
 
 import com.keumbang.api.auth_server.auth.type.TokenType;
+import com.keumbang.api.auth_server.common.exception.ErrorCode;
+import com.keumbang.api.auth_server.common.exception.JwtAuthenticationException;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +23,29 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secret) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8),Jwts.SIG.HS256.key().build().getAlgorithm());
+    }
+
+    public void validateToken(String token) {
+        try {
+            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token); // JWT 서명 및 유효성 검증
+        } catch (ExpiredJwtException e) {
+            throw new JwtAuthenticationException(ErrorCode.TOKEN_EXPIRED, e);
+        } catch (MalformedJwtException | UnsupportedJwtException |
+                 SignatureException | IllegalArgumentException e) {
+            throw new JwtAuthenticationException(ErrorCode.INVALID_TOKEN, e);
+        }
+    }
+
+    public String getUsername(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("account", String.class);
+    }
+
+    public String getCategory(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("category", String.class);
+    }
+
+    public Long getUserId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("userId", Long.class);
     }
 
     public String createJwt(TokenType tokenType, String username, Long userId) {

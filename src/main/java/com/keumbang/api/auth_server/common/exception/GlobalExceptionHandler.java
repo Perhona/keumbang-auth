@@ -38,6 +38,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
+    // JWT 유효성 검증
+    @ExceptionHandler(value = JwtAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleJwtExceptions(JwtAuthenticationException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(ex.getErrorCode(), ex.getMessage());
+        return new ResponseEntity<>(errorResponse, errorResponse.getHttpStatus());
+    }
+
     // 모든 예외 처리
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex, WebRequest request) {

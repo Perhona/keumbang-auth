@@ -4,8 +4,10 @@ import com.keumbang.api.auth_server.auth.dto.LoginRequestDto;
 import com.keumbang.api.auth_server.auth.dto.SignUpRequestDto;
 import com.keumbang.api.auth_server.auth.service.AuthService;
 import com.keumbang.api.auth_server.common.exception.CustomException;
+import com.keumbang.api.auth_server.common.exception.JwtAuthenticationException;
 import com.keumbang.api.auth_server.common.response.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,4 +52,16 @@ public class AuthController {
         return new ResponseEntity<>(CommonResponse.ok("로그인에 성공하였습니다."), HttpStatus.OK);
     }
 
+    /**
+     * Access Token 재발급, Refresh Token 갱신
+     *
+     * @return 200 Authorization Header AccessToken, Cookie RefreshToken 갱신
+     * @throws JwtAuthenticationException RefreshToken이 유효하지 않은 경우
+     */
+    @Operation(summary = "Access Token 재발급, Refresh Token 갱신", description = "기존 Refresh Token으로 Access Token 재발급하고 Authorization Header에 반환합니다. Refresh Token또한 갱신하여 Cookie에 저장됩니다.")
+    @PostMapping("/reissue")
+    public ResponseEntity<CommonResponse<?>> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        authService.reissueTokens(request, response);
+        return new ResponseEntity<>(CommonResponse.ok("Access Token 재발급, Refresh Token 갱신에 성공했습니다."), HttpStatus.OK);
+    }
 }
