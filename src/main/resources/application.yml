@@ -1,6 +1,10 @@
 server:
   port: ${SPRING_PORT}
 
+grpc:
+  server:
+    port: ${GRPC_PORT}
+
 spring:
   application:
     name: keumbang-auth

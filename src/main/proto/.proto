@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package auth;
+
+// Java 옵션 설정
+option java_multiple_files = true;
+option java_package = "com.keumbang.api.auth_server.grpc";  // Java 패키지 경로 설정
+option java_outer_classname = "AuthServiceProto";           // 외부 클래스 이름 설정
+
+// gRPC 서비스 정의
+service AuthService {
+  // Access Token 검증을 위한 RPC 메서드
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+// 요청 메시지 정의
+message ValidateTokenRequest {
+  string accessToken = 1;  // Access Token 필드
+}
+
+// 응답 메시지 정의
+message ValidateTokenResponse {
+  bool isValid = 1;         // 토큰의 유효성 여부
+  int64 userId = 2;         // 사용자 ID
+  string account = 3;       // 사용자 계정
+  string message = 4;       // 응답 메시지
+}

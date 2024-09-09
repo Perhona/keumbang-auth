@@ -1,47 +1,96 @@
+buildscript {
+    // Protocol Buffers (protobuf) 및 gRPC 관련 버전 정의
+    ext {
+        protobufVersion = '3.23.4'
+        protobufPluginVersion = '0.8.18'
+        grpcVersion = '1.58.0'
+    }
+}
+
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.2.8'
-	id 'io.spring.dependency-management' version '1.1.6'
+    id 'java'
+    id 'org.springframework.boot' version '3.2.8'
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'com.google.protobuf' version "${protobufPluginVersion}"
+    id 'idea'
 }
 
 group = 'com.keumbang.api'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.3'
 
-	// JWT
-	implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
-	implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
-	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+    // JWT
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 
-	// env 파일 설정
-	implementation "me.paulschwarz:spring-dotenv:4.0.0"
+    // env 파일 설정
+    implementation "me.paulschwarz:spring-dotenv:4.0.0"
 
-	compileOnly 'org.projectlombok:lombok'
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // gRPC
+    implementation 'net.devh:grpc-server-spring-boot-starter:3.1.0.RELEASE'
+    if (JavaVersion.current().isJava9Compatible()) {
+        // Java 9+ 호환성을 위한 javax.annotation.Generated 해결 방법
+        // 참조: https://github.com/grpc/grpc-java/issues/3633
+        compileOnly 'org.apache.tomcat:annotations-api:6.0.53'
+        annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    }
+}
+
+
+// Protocol Buffers (protobuf) 플러그인 설정
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${protobufVersion}"
+    }
+    generatedFilesBaseDir = "$projectDir/build/generated"
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+idea {
+    module {
+        // IntelliJ IDEA에서 소스 디렉토리로 인식할 경로 설정
+        sourceDirs += file('build/generated/main/java')
+        sourceDirs += file('build/generated/main/grpc')
+        generatedSourceDirs += file('build/generated/main/java')
+        generatedSourceDirs += file('build/generated/main/grpc')
+    }
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }

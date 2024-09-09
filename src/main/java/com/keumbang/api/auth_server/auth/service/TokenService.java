@@ -6,6 +6,7 @@ import com.keumbang.api.auth_server.auth.type.TokenType;
 import com.keumbang.api.auth_server.common.exception.ErrorCode;
 import com.keumbang.api.auth_server.common.exception.JwtAuthenticationException;
 import com.keumbang.api.auth_server.common.util.TokenManager;
+import com.keumbang.api.auth_server.user.entity.User;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,7 @@ public class TokenService {
         tokenManager.validateToken(refreshToken);
 
         // 2. 토큰 종류 확인
-        if(!tokenManager.isTokenOf(refreshToken, TokenType.REFRESH)){
+        if (!tokenManager.isTokenOf(refreshToken, TokenType.REFRESH)) {
             throw new JwtAuthenticationException(ErrorCode.TOKEN_TYPE_NOT_MATCHED);
         }
 
@@ -80,5 +81,21 @@ public class TokenService {
         Long userId = tokenManager.getUserId(refreshToken);
         deleteRefreshToken(userId);
         issueTokens(response, username, userId);
+    }
+
+    public User validateAccessToken(String accessToken) {
+        // 1. 토큰 자체 유효성 검사
+        tokenManager.validateToken(accessToken);
+
+        // 2. 토큰 종류 확인
+        if (!tokenManager.isTokenOf(accessToken, TokenType.ACCESS)) {
+            throw new JwtAuthenticationException(ErrorCode.TOKEN_TYPE_NOT_MATCHED);
+        }
+
+        // 3. 사용자 정보 저장
+        return User.builder()
+                .id(tokenManager.getUserId(accessToken))
+                .account(tokenManager.getUsername(accessToken))
+                .build();
     }
 }
