@@ -7,6 +7,10 @@ import com.keumbang.api.auth_server.common.exception.CustomException;
 import com.keumbang.api.auth_server.common.exception.JwtAuthenticationException;
 import com.keumbang.api.auth_server.common.response.CommonResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Auth API", description = "사용자 인증 관련 API")
 public class AuthController {
 
     private final AuthService authService;
@@ -31,6 +36,11 @@ public class AuthController {
      * @throws CustomException 계정명 중복 -> ACCOUNT_ALREADY_REGISTERED
      */
     @Operation(summary = "사용자 회원가입", description = "사용자는 계정과 비밀번호로 회원 가입합니다.")
+    @ApiResponse(
+            responseCode = "200"
+            , description = "회원가입 성공"
+            , content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))
+    )
     @PostMapping("/signup")
     public ResponseEntity<CommonResponse<Long>> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
         CommonResponse<Long> response = CommonResponse.ok("회원가입에 성공했습니다.", authService.signUp(signUpRequestDto));
@@ -46,6 +56,11 @@ public class AuthController {
      * @throws CustomException 인증 실패 -> USER_NOT_FOUND, PASSWORD_NOT_MATCHED
      */
     @Operation(summary = "사용자 로그인", description = "사용자는 계정과 비밀번호로 로그인합니다.")
+    @ApiResponse(
+            responseCode = "200"
+            , description = "로그인 성공"
+            , content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))
+    )
     @PostMapping("/login")
     public ResponseEntity<CommonResponse<?>> login(@RequestBody @Valid LoginRequestDto loginRequestDto, HttpServletResponse response) {
         authService.login(loginRequestDto, response);
@@ -59,6 +74,11 @@ public class AuthController {
      * @throws JwtAuthenticationException RefreshToken이 유효하지 않은 경우
      */
     @Operation(summary = "Access Token 재발급, Refresh Token 갱신", description = "기존 Refresh Token으로 Access Token 재발급하고 Authorization Header에 반환합니다. Refresh Token또한 갱신하여 Cookie에 저장됩니다.")
+    @ApiResponse(
+            responseCode = "200"
+            , description = "Access Token 재발급, Refresh Token 갱신 완료"
+            , content = @Content(mediaType = "application/json", schema = @Schema(implementation = CommonResponse.class))
+    )
     @PostMapping("/reissue")
     public ResponseEntity<CommonResponse<?>> reissueAccessToken(HttpServletRequest request, HttpServletResponse response) {
         authService.reissueTokens(request, response);

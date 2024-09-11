@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
+@Schema(description = "로그인 요청 DTO")
 @Getter
 public class LoginRequestDto {
     @Schema(description = "사용자 계정", example = "john_doe")
