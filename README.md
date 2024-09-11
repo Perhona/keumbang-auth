@@ -27,8 +27,8 @@
 ### 1. 프로젝트 클론
 
 ```bash
-git clone https://github.com/Perhona/keumbang_auth.git
-cd keumbang_auth
+git clone https://github.com/Perhona/keumbang-auth.git
+cd keumbang-auth
 ```
 
 ### 2. 프로젝트 환경 설정
@@ -45,7 +45,7 @@ SPRING_PORT=port_number
 GRPC_PORT=grpc_port_number
 
 # 데이터베이스 설정
-SPRING_DATASOURCE_URL=jdbc:mariadb://localhost:3308/db_name
+SPRING_DATASOURCE_URL=jdbc:mariadb://localhost:port_number/db_name
 SPRING_DATASOURCE_USERNAME=db_username
 SPRING_DATASOURCE_PASSWORD=db_password
 
