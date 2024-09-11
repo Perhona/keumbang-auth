@@ -1,12 +1,12 @@
 package com.keumbang.api.auth_server.grpc.service;
 
 import com.keumbang.api.auth_server.auth.service.TokenService;
+import com.keumbang.api.auth_server.common.exception.ErrorCode;
 import com.keumbang.api.auth_server.common.exception.JwtAuthenticationException;
 import com.keumbang.api.auth_server.grpc.AuthServiceGrpc;
 import com.keumbang.api.auth_server.grpc.ValidateTokenRequest;
 import com.keumbang.api.auth_server.grpc.ValidateTokenResponse;
 import com.keumbang.api.auth_server.user.entity.User;
-import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -16,7 +16,7 @@ import net.devh.boot.grpc.server.service.GrpcService;
 public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
 
     private final TokenService tokenService;
-    private final String SUCCESS_MESSAGE = "Access Token 인증에 성공했습니다.";
+    private final String SUCCESS_MESSAGE = "Authentication success";
 
     @Override
     public void validateToken(ValidateTokenRequest request, StreamObserver<ValidateTokenResponse> responseObserver) {
@@ -25,9 +25,9 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
         try {
             sendSuccessResponse(responseObserver, tokenService.validateAccessToken(accessToken));
         } catch (JwtAuthenticationException e) {    // JWT 관련 예외 처리
-            sendErrorResponse(responseObserver, Status.UNAUTHENTICATED, e.getErrorCode().getMessage());
+            sendErrorResponse(responseObserver, e.getErrorCode());
         } catch (Exception e) {                     // 기타 예외 처리
-            sendErrorResponse(responseObserver, Status.INTERNAL, "시스템 에러가 발생했습니다.");
+            sendErrorResponse(responseObserver, ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -42,7 +42,13 @@ public class AuthServiceImpl extends AuthServiceGrpc.AuthServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    private void sendErrorResponse(StreamObserver<ValidateTokenResponse> responseObserver, Status status, String message) {
-        responseObserver.onError(status.withDescription(message).asRuntimeException());
+    private void sendErrorResponse(StreamObserver<ValidateTokenResponse> responseObserver, ErrorCode errorCode) {
+        ValidateTokenResponse response = ValidateTokenResponse.newBuilder()
+                .setIsValid(false)
+                .setErrorCode(errorCode.name())
+                .setMessage(errorCode.getMessage())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 }

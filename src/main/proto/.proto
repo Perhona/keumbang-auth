@@ -23,5 +23,6 @@ message ValidateTokenResponse {
   bool isValid = 1;         // 토큰의 유효성 여부
   int64 userId = 2;         // 사용자 ID
   string account = 3;       // 사용자 계정
-  string message = 4;       // 응답 메시지
+  string errorCode = 4;     // 에러 코드
+  string message = 5;       // 응답 메시지
 }
